@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chart Analysis — Trading Mentorship</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --text: #f0ede8;
+    --text-muted: #6a6560;
+    --text-mid: #9a9590;
+    --red: #e05c5c;
+    --green: #5ce0a0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .logo-area h1 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .logo-area h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+  }
+
+  .header-badge {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* USAGE COUNTER */
+  .usage-bar {
+    padding: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .usage-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .usage-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .dot.used { background: var(--accent); }
+  .dot.remaining { background: var(--surface2); border: 1px solid var(--border); }
+
+  .usage-text {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-mid);
+    margin-left: auto;
+  }
+
+  /* EMAIL GATE */
+  .gate {
+    padding: 80px 0;
+    max-width: 520px;
+  }
+
+  .gate-eyebrow {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .gate h3 {
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .gate p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .input-row:focus-within {
+    border-color: var(--accent);
+  }
+
+  .input-row input {
+    flex: 1;
+    background: var(--surface);
+    border: none;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    outline: none;
+  }
+
+  .input-row input::placeholder { color: var(--text-muted); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    padding: 14px 24px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .gate-note {
+    margin-top: 16px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  /* ERROR */
+  .error-msg {
+    margin-top: 12px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--red);
+  }
+
+  /* MAIN ANALYZER */
+  .analyzer {
+    padding: 40px 0 80px;
+  }
+
+  .welcome-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .welcome-strip p {
+    font-size: 13px;
+    color: var(--text-mid);
+  }
+
+  .welcome-strip strong { color: var(--text); }
+
+  .logout-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .logout-btn:hover { border-color: var(--text-muted); color: var(--text); }
+
+  /* UPLOAD SECTION */
+  .section-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .upload-zone {
+    border: 1px dashed var(--border);
+    background: var(--surface);
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .upload-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .upload-hint {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  .upload-preview {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .upload-preview img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .remove-img {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .remove-img:hover { color: var(--red); border-color: var(--red); }
+
+  /* TEXTAREA */
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 16px;
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 24px;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text-muted); }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .submit-note {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  .btn-submit {
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    padding: 14px 32px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-submit:hover { background: var(--accent2); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* LOADING */
+  .loading-state {
+    padding: 48px 0;
+    text-align: center;
+  }
+
+  .loading-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    height: 32px;
+    margin-bottom: 20px;
+  }
+
+  .bar {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: barPulse 1.2s ease-in-out infinite;
+  }
+
+  .bar:nth-child(1) { animation-delay: 0s; }
+  .bar:nth-child(2) { animation-delay: 0.1s; }
+  .bar:nth-child(3) { animation-delay: 0.2s; }
+  .bar:nth-child(4) { animation-delay: 0.3s; }
+  .bar:nth-child(5) { animation-delay: 0.4s; }
+
+  @keyframes barPulse {
+    0%, 100% { height: 8px; opacity: 0.3; }
+    50% { height: 28px; opacity: 1; }
+  }
+
+  .loading-text {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* RESPONSE */
+  .response-block {
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+    padding-top: 40px;
+  }
+
+  .response-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .response-tag {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #0a0a0a;
+    background: var(--accent);
+    padding: 4px 10px;
+  }
+
+  .response-num {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  .response-content {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .response-content strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* UPSELL */
+  .upsell-block {
+    margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    padding: 32px;
+  }
+
+  .upsell-block h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .upsell-block p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .upsell-cta {
+    display: inline-block;
+    background: var(--accent);
+    color: #0a0a0a;
+    padding: 14px 28px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+  }
+
+  .upsell-cta:hover { background: var(--accent2); }
+
+  /* NEW ANALYSIS BTN */
+  .new-analysis-btn {
+    margin-top: 32px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 12px 24px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .new-analysis-btn:hover { border-color: var(--text-muted); color: var(--text); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* HISTORY */
+  .history-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .history-item:last-child { border-bottom: none; }
+
+  .history-meta {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .history-preview {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* LIMIT REACHED */
+  .limit-block {
+    padding: 60px 0;
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .limit-block h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .limit-block p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  /* ANIMATIONS */
+  .fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .header-badge { display: none; }
+    .submit-row { flex-direction: column; align-items: stretch; }
+    .welcome-strip { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-inner">
+      <div class="logo-area">
+        <h1>Trading Mentorship</h1>
+        <h2>Chart<br>Analysis</h2>
+      </div>
+      <div class="header-badge">RELEVANT LIQUIDITY<br>FRAMEWORK™</div>
+    </div>
+  </header>
+
+  <div id="app"></div>
+</div>
+
+<script>
+// ============================================================
+// SYSTEM PROMPT — Your trading philosophy & voice
+// ============================================================
+const SYSTEM_PROMPT = `You are a professional trading mentor and analyst with over 10 years of experience in Forex and Gold markets. You analyze charts and give direct, no-bullshit feedback to traders who have completed your training program.
+
+YOUR TRADING PHILOSOPHY & METHODOLOGY:
+
+1. RELEVANT LIQUIDITY — Your core concept
+- Not all liquidity is equal. Most traders call everything "liquidity" — you disagree strongly.
+- Only "Relevant Liquidity Areas" matter — zones where there are REAL stop losses from real traders.
+- Liquidity acts as a MAGNET for price. The more relevant, the more it attracts price.
+- When you take a trade, always ask: what is PUSHING price, and what is ATTRACTING price?
+- Focus only on what happened in the last few hours on the 5min — not 2 weeks ago. Traders from 2 weeks ago are no longer in their positions.
+
+2. MARKET STRUCTURE
+- You work primarily on 5-minute charts for structure identification
+- You look for OBVIOUS structures — structures that even a beginner would see
+- "Obvious" structures are where breakout traders, SMC traders, ICT traders, order block traders, fibonacci traders and trendline traders ALL enter at the same point — creating confluent stop loss clusters
+- You ONLY care about structures from the last few hours
+- You need: a clean break, a return to the order block that caused the break, then a reaction
+- Key concept: EQH (Equal Highs) is only RELEVANT if there is a break to the downside after it. Without the break, it's not relevant.
+
+3. TYPES OF LIQUIDITY TRADERS TO TRACK:
+- Breakout traders: mainly active during London session
+- Order block traders / SMC / ICT traders: majority of retail market
+- Fibonacci traders: enter at retracement levels
+- Trendline traders: enter at trendline touches
+- When ALL of these traders enter at the same zone → their stop losses cluster → that's your Relevant Liquidity Area
+
+4. ENTRY CRITERIA:
+- Speed and momentum INTO a Relevant Liquidity Zone = institutions driving price into liquidity
+- If you see speed + momentum coming into a relevant zone, that's your alert signal
+- Trade INTO the liquidity and AWAY from the liquidity (entry and target logic)
+- Look for SMT (Smart Money Trap) signals — divergences between correlated pairs that reveal institutional activity
+
+5. YOUR PHILOSOPHY:
+- Trading is NOT a get-rich-quick scheme. Focus on consistent small % returns per month.
+- Prop firms are mostly designed for traders to lose money — they're a lucrative business. Real traders build track records and approach investors with real capital.
+- Day trading every day only serves the broker. Trade ONLY when there is something worth the risk.
+- Emotional control is just as important as technical analysis. Many traders understand the technical side but can't control their emotions — this keeps them stuck for years.
+- There are no magic mechanical strategies that repeat forever. You need deep understanding of WHY price moves, not just WHERE.
+- Smart traders succeed. Lazy thinkers fail. Trading attracts get-rich-quick personalities — only those who truly understand the market survive.
+- "Strategy" is a word for beginners looking for a magic bullet. You use "market approach" instead.
+- Build a real track record on a small live account. Track on MyFXBook. Approach investors. Scale with real capital.
+
+6. HOW YOU ANALYZE A CHART:
+Step 1: Go to 5-minute chart
+Step 2: Identify if there's an OBVIOUS market structure (a structure even a beginner would see)
+Step 3: Find Relevant Liquidity Areas — zones with clustered stop losses from multiple trader types
+Step 4: Check for speed/momentum as price approaches these zones
+Step 5: Look for confluence — are multiple trader types entering at the same level?
+Step 6: Identify what's pushing and attracting price
+
+YOUR COMMUNICATION STYLE:
+- Direct, no-bullshit, straight to the point
+- You don't waste time with fluff or compliments
+- You speak like a mentor who has seen it all and tells it like it is
+- You're not harsh — you're honest and you care about the trader's development
+- You use specific terms: "Relevant Liquidity", "obvious structure", "speed and momentum", "SMT", "EQH/EQL", "order block", "confluence", "market approach"
+- You sometimes say things like "this is not relevant", "this is obvious", "the market is searching for this liquidity"
+- You don't sugarcoat mistakes — you point them out clearly and explain WHY
+- Short paragraphs. Never more than 3-4 sentences per point.
+- You give a clear verdict: is this a good setup or not? Why?
+- At the end of every analysis, you point out ONE thing the trader must work on most
+
+FORMAT:
+- Start with your immediate read on what you see
+- Point out what's RIGHT in their analysis (if anything)
+- Point out what's WRONG or what they're missing
+- Give them a clear direction: what to look for next, what to do
+- End with one key lesson tied to their specific chart
+- Keep it under 350 words. Traders need clarity, not essays.
+- Do NOT use bullet points with emojis. Use plain structure.
+- Do NOT be generic. Reference specific things you see in the chart.
+
+IMPORTANT: You are analyzing the chart image they uploaded. Reference specific price levels, zones, or patterns you can actually see in the image. If the image is unclear or you need more context, ask one specific question.`;
+
+// ============================================================
+// STATE
+// ============================================================
+const MAX_ANALYSES = 3;
+const STORAGE_KEY = 'trading_mentor_data';
+
+function getState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { email: null, count: 0, history: [] };
+    return JSON.parse(raw);
+  } catch(e) {
+    return { email: null, count: 0, history: [] };
+  }
+}
+
+function saveState(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+let state = getState();
+let currentImage = null;
+let isLoading = false;
+
+function render() {
+  const app = document.getElementById('app');
+  if (!state.email) {
+    app.innerHTML = renderGate();
+  } else if (state.count >= MAX_ANALYSES) {
+    app.innerHTML = renderUsageBar() + renderLimitReached();
+  } else {
+    app.innerHTML = renderUsageBar() + renderAnalyzer();
+  }
+  bindEvents();
+}
+
+function renderUsageBar() {
+  if (!state.email) return '';
+  const used = state.count;
+  const remaining = MAX_ANALYSES - used;
+  let dots = '';
+  for (let i = 0; i < MAX_ANALYSES; i++) {
+    dots += `<div class="dot ${i < used ? 'used' : 'remaining'}"></div>`;
+  }
+  return `
+    <div class="usage-bar">
+      <span class="usage-label">Analyses</span>
+      <div class="usage-dots">${dots}</div>
+      <span class="usage-text">${remaining} remaining</span>
+    </div>
+  `;
+}
+
+function renderGate() {
+  return `
+    <div class="gate fade-in">
+      <div class="gate-eyebrow">Access Required</div>
+      <h3>Get Your Chart<br>Analysed.</h3>
+      <p>This tool is exclusively available to traders who have completed the full training program. Enter the email you used to purchase access.</p>
+      <div class="input-row">
+        <input type="email" id="gate-email" placeholder="your@email.com" />
+        <button class="btn-primary" id="gate-btn">Access →</button>
+      </div>
+      <div class="error-msg" id="gate-error"></div>
+      <p class="gate-note">// Limited to ${MAX_ANALYSES} free analyses per account</p>
+    </div>
+  `;
+}
+
+function renderAnalyzer() {
+  const lastAnalysis = state.history.length > 0 ? state.history[state.history.length - 1] : null;
+  
+  return `
+    <div class="analyzer fade-in">
+      <div class="welcome-strip">
+        <p>Logged in as <strong>${state.email}</strong></p>
+        <button class="logout-btn" id="logout-btn">Log out</button>
+      </div>
+
+      <div class="section-label">01 — Upload your chart</div>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" />
+        <div class="upload-icon">📊</div>
+        <p class="upload-text">Drop your chart screenshot here</p>
+        <p class="upload-hint">PNG, JPG, WEBP — TradingView screenshots work best</p>
+      </div>
+      <div id="preview-container"></div>
+
+      <div class="section-label">02 — Describe your reasoning</div>
+      <textarea id="reasoning" placeholder="Tell me: What pair/timeframe? What did you see before entering? Why did you take this trade (or why are you considering it)? What is your stop loss and target? Be specific — generic descriptions get generic feedback."></textarea>
+
+      <div class="submit-row">
+        <span class="submit-note">// Analysis uses AI — be specific for best results</span>
+        <button class="btn-submit" id="submit-btn">Get Analysis →</button>
+      </div>
+
+      <div id="loading-container"></div>
+      <div id="response-container"></div>
+
+      ${lastAnalysis ? renderHistory() : ''}
+    </div>
+  `;
+}
+
+function renderHistory() {
+  if (state.history.length === 0) return '';
+  const items = state.history.slice().reverse().map((h, i) => `
+    <div class="history-item">
+      <div class="history-meta">Analysis #${state.history.length - i} — ${h.date}</div>
+      <div class="history-preview">${h.response.substring(0, 180)}...</div>
+    </div>
+  `).join('');
+  return `
+    <div class="divider"></div>
+    <div class="section-label">Previous analyses</div>
+    ${items}
+  `;
+}
+
+function renderLimitReached() {
+  return `
+    <div class="limit-block fade-in">
+      <h3>You've used your<br>3 free analyses.</h3>
+      <p>You've seen what I do. I've looked at your charts, I've pointed out what's working and what needs fixing.<br><br>If you want to continue working on your analysis and get personalized feedback every week, here's how we can work together properly.</p>
+      <div class="upsell-block" style="text-align:left; margin-bottom: 24px;">
+        <h4>Audit — Personalized coaching</h4>
+        <p>You send me your trades. I come back with a detailed video review of your reasoning, your entries, your risk management. Every week. This is what moves the needle.</p>
+        <a class="upsell-cta" href="https://discord.com" target="_blank">Send me a message on Discord →</a>
+      </div>
+      <button class="logout-btn" id="logout-btn" style="margin-top:16px;">Use a different account</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+function bindEvents() {
+  // Gate
+  const gateBtn = document.getElementById('gate-btn');
+  const gateEmail = document.getElementById('gate-email');
+  if (gateBtn) {
+    gateBtn.addEventListener('click', handleGate);
+    gateEmail?.addEventListener('keydown', e => { if (e.key === 'Enter') handleGate(); });
+  }
+
+  // Logout
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    state.email = null;
+    saveState(state);
+    render();
+  });
+
+  // File upload
+  const fileInput = document.getElementById('file-input');
+  const uploadZone = document.getElementById('upload-zone');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) handleImageFile(file);
+    });
+  }
+
+  if (uploadZone) {
+    uploadZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) handleImageFile(file);
+    });
+  }
+
+  // Submit
+  document.getElementById('submit-btn')?.addEventListener('click', handleSubmit);
+}
+
+function handleGate() {
+  const emailInput = document.getElementById('gate-email');
+  const error = document.getElementById('gate-error');
+  const btn = document.getElementById('gate-btn');
+  const email = emailInput?.value?.trim();
+
+  if (!email || !email.includes('@')) {
+    error.textContent = '// Please enter a valid email address.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  error.textContent = '';
+
+  // Simulate check (in production, this calls your Stripe API)
+  setTimeout(() => {
+    // For now, accept any valid email — replace with real Stripe check
+    state.email = email;
+    state.count = state.count || 0;
+    saveState(state);
+    render();
+  }, 800);
+}
+
+function handleImageFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentImage = {
+      data: e.target.result.split(',')[1],
+      mimeType: file.type,
+      full: e.target.result
+    };
+    const preview = document.getElementById('preview-container');
+    const zone = document.getElementById('upload-zone');
+    if (preview) {
+      preview.innerHTML = `
+        <div class="upload-preview">
+          <img src="${currentImage.full}" alt="Chart preview" />
+          <button class="remove-img" id="remove-img">✕</button>
+        </div>
+      `;
+      document.getElementById('remove-img')?.addEventListener('click', () => {
+        currentImage = null;
+        preview.innerHTML = '';
+        if (zone) zone.style.display = '';
+      });
+      if (zone) zone.style.display = 'none';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function handleSubmit() {
+  const reasoning = document.getElementById('reasoning')?.value?.trim();
+  const loadingContainer = document.getElementById('loading-container');
+  const responseContainer = document.getElementById('response-container');
+  const submitBtn = document.getElementById('submit-btn');
+
+  if (!currentImage) {
+    alert('Please upload a chart screenshot first.');
+    return;
+  }
+
+  if (!reasoning || reasoning.length < 20) {
+    alert('Please describe your reasoning in at least a few sentences. Generic descriptions get generic feedback.');
+    return;
+  }
+
+  if (isLoading) return;
+  isLoading = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Analyzing...';
+
+  loadingContainer.innerHTML = `
+    <div class="loading-state fade-in">
+      <div class="loading-bars">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
+      </div>
+      <p class="loading-text">// Reading your chart structure...</p>
+    </div>
+  `;
+  responseContainer.innerHTML = '';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: currentImage.mimeType,
+                data: currentImage.data
+              }
+            },
+            {
+              type: 'text',
+              text: `Here is my chart and my reasoning:\n\n${reasoning}\n\nPlease give me your honest analysis.`
+            }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const analysisText = data.content?.[0]?.text || 'Unable to analyze this chart. Please try again.';
+
+    // Update state
+    state.count += 1;
+    const analysisNum = state.count;
+    const now = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    state.history = state.history || [];
+    state.history.push({ date: now, response: analysisText, reasoning });
+    saveState(state);
+
+    loadingContainer.innerHTML = '';
+
+    const showUpsell = state.count >= MAX_ANALYSES;
+
+    responseContainer.innerHTML = `
+      <div class="response-block fade-in">
+        <div class="response-header">
+          <span class="response-tag">Analysis #${analysisNum}</span>
+          <span class="response-num">${now}</span>
+        </div>
+        <div class="response-content">${formatResponse(analysisText)}</div>
+        ${showUpsell ? renderUpsell() : renderNewAnalysis()}
+      </div>
+    `;
+
+    // Update usage bar
+    const usageBarEl = document.querySelector('.usage-bar');
+    if (usageBarEl) {
+      usageBarEl.outerHTML = renderUsageBar();
+    }
+
+    // Bind new analysis button
+    document.getElementById('new-analysis-btn')?.addEventListener('click', () => {
+      currentImage = null;
+      document.getElementById('reasoning').value = '';
+      document.getElementById('preview-container').innerHTML = '';
+      document.getElementById('upload-zone').style.display = '';
+      responseContainer.innerHTML = '';
+      loadingContainer.innerHTML = '';
+    });
+
+    // If limit reached, reload to show limit screen
+    if (showUpsell) {
+      setTimeout(() => render(), 3000);
+    }
+
+  } catch(err) {
+    loadingContainer.innerHTML = '';
+    responseContainer.innerHTML = `<div class="error-msg" style="margin-top:24px;">// Error: ${err.message}. Please try again.</div>`;
+  }
+
+  isLoading = false;
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Get Analysis →';
+  }
+}
+
+function renderUpsell() {
+  return `
+    <div class="upsell-block" style="margin-top: 32px;">
+      <h4>That was your last free analysis.</h4>
+      <p>You've now seen how I work. If you want this kind of feedback on your trades every week — not a one-off, but a real structured process to fix your reasoning and build consistency — send me a message on Discord. I'll take a look at where you're at and tell you if the audit makes sense for you.</p>
+      <a class="upsell-cta" href="https://discord.com" target="_blank">Message me on Discord →</a>
+    </div>
+  `;
+}
+
+function renderNewAnalysis() {
+  return `<button class="new-analysis-btn" id="new-analysis-btn">← Analyze another chart</button>`;
+}
+
+function formatResponse(text) {
+  // Bold key terms
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(Relevant Liquidity|relevant liquidity|SMT|EQH|EQL|order block|Order Block|liquidity|confluence|momentum|speed)/g, '<strong>$1</strong>');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+render();
+</script>
+</body>
+</html>
