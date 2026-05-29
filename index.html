@@ -1000,7 +1000,9 @@ async function handleSubmit() {
     });
 
     const data = await response.json();
-    const analysisText = data.content?.[0]?.text || 'Unable to analyze this chart. Please try again.';
+    const analysisText = (data && data.content && data.content[0] && data.content[0].text) 
+      ? data.content[0].text 
+      : (data && data.error ? 'Error: ' + data.error.message : 'Unable to analyze this chart. Please try again.');
 
     // Update state
     state.count += 1;
