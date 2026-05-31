@@ -783,8 +783,15 @@ function renderAnalyzer() {
         <button class="logout-btn" id="logout-btn">Log out</button>
       </div>
 
-      <div class="section-label">Tell me where you're at</div>
-      <textarea id="reasoning" placeholder="How long have you been trading? What's your main struggle right now? What have you already tried? Be honest — the more specific you are, the more precise your roadmap will be."></textarea>
+      <div class="section-label">Tell me about yourself</div>
+      <textarea id="reasoning" placeholder="Write to me:
+
+- Exactly the situation you are currently in
+- The challenges you are facing right now
+- The different types of accounts you are trading (live, funded, demo)
+- Where you want to be in the next 5 years
+
+Be specific and honest — you will get a response from me based on everything you share."></textarea>
 
       <div class="submit-row">
         <span class="submit-note">// Powered by Alex's data — be specific for best results</span>
@@ -817,11 +824,11 @@ function renderHistory() {
 function renderLimitReached() {
   return `
     <div class="limit-block fade-in">
-      <h3>You've got your<br>3 free roadmaps.</h3>
-      <p>You've seen how I think. Now if you want to work on this properly — with real personalized feedback on your specific situation every week — here's how we can do it.</p>
+      <h3>You've received your<br>3 personalized answers.</h3>
+      <p>You now have a clearer picture of where you stand and what to focus on. If you want to go further and access my time directly, here is the structure I use when I work with someone in coaching.</p>
       <div class="upsell-block" style="text-align:left; margin-bottom: 24px;">
-        <h4>Audit — Personalized coaching</h4>
-        <p>You send me your trades. I come back with a detailed video review of your reasoning, your entries, your risk management. Every week. This is what moves the needle.</p>
+        <h4>Work with me directly</h4>
+        <p>You send me your trades and your situation every week. I come back with a detailed, personalized response — exactly what to fix, what to focus on, and how to move forward. This is what actually moves the needle.</p>
         <a class="upsell-cta" href="https://discord.com" target="_blank">Send me a message on Discord →</a>
       </div>
       <button class="logout-btn" id="logout-btn" style="margin-top:16px;">Use a different account</button>
@@ -967,20 +974,7 @@ async function handleSubmit() {
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: currentImage.mimeType,
-                data: currentImage.data
-              }
-            },
-            {
-              type: 'text',
-              text: `Here is my chart and my reasoning:\n\n${reasoning}\n\nPlease give me your honest analysis.`
-            }
-          ]
+          content: `Here is where I am at in my trading:\n\n${reasoning}\n\nPlease give me an honest roadmap of what I should focus on.`
         }]
       })
     });
