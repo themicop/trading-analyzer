@@ -699,12 +699,31 @@ FORMAT:
 - Do NOT use bullet points with emojis. Use plain structure.
 - Do NOT be generic. Reference specific things you see in the chart.
 
-IMPORTANT: You are analyzing the chart image they uploaded. Reference specific price levels, zones, or patterns you can actually see in the image. If the image is unclear or you need more context, ask one specific question.`;
+RESPONSE STRUCTURE — ALWAYS FOLLOW THIS:
+
+1. IDENTIFY THE REAL PROBLEM
+Start by naming exactly what their core issue is. Not what they think it is — what it actually is. Be direct. One short paragraph.
+
+2. WHAT TO FOCUS ON RIGHT NOW
+Give them 2-3 specific, actionable things to work on. Real advice, real value. But do not give everything — give enough to show you understand their situation and know the solution. Leave room for the deeper work.
+
+3. THE BRIDGE
+Always end with this — naturally, not like a pitch:
+
+"I've worked with traders in your exact situation. The ones who moved forward didn't find a magic strategy — they worked on [name the specific thing relevant to their situation: consistency, emotional control, building a track record, understanding liquidity, etc.]. That's what the structure I use in my coaching is built around. If you want to see exactly how I approach this, it's just below."
+
+IMPORTANT RULES:
+- Never give the full roadmap in one response. Give clarity on the problem + direction, not the entire solution.
+- Always make them feel understood before you give direction.
+- Never mention prop firms positively. If they mention prop firms, redirect toward building a real track record with investor capital.
+- Keep it under 300 words. Clarity beats length.
+- No bullet points with emojis. Clean, direct prose.
+- Speak like a mentor, not a coach trying to sell something.`;
 
 // ============================================================
 // STATE
 // ============================================================
-const MAX_ANALYSES = 3;
+const MAX_ANALYSES = 2;
 const STORAGE_KEY = 'trading_mentor_data';
 
 function getState() {
@@ -768,7 +787,7 @@ function renderGate() {
         <button class="btn-primary" id="gate-btn">Access →</button>
       </div>
       <div class="error-msg" id="gate-error"></div>
-      <p class="gate-note">// Limited to 3 personalized responses maximum</p>
+      <p class="gate-note">// 2 personalized responses — make sure you write the right thing</p>
     </div>
   `;
 }
@@ -824,12 +843,12 @@ function renderHistory() {
 function renderLimitReached() {
   return `
     <div class="limit-block fade-in">
-      <h3>You've received your<br>3 personalized answers.</h3>
-      <p>You now have a clearer picture of where you stand and what to focus on. If you want to go further and access my time directly, here is the structure I use when I work with someone in coaching.</p>
+      <h3>You've used your<br>2 personalized responses.</h3>
+      <p>You now know where you stand and what to work on. If you want to go further, here is the exact structure I use when I work with a trader — what has allowed people in your exact situation to build confidence, take better trades and scale with investor capital.</p>
       <div class="upsell-block" style="text-align:left; margin-bottom: 24px;">
-        <h4>Work with me directly</h4>
-        <p>You send me your trades and your situation every week. I come back with a detailed, personalized response — exactly what to fix, what to focus on, and how to move forward. This is what actually moves the needle.</p>
-        <a class="upsell-cta" href="https://discord.com" target="_blank">Send me a message on Discord →</a>
+        <h4>The structure I use in coaching</h4>
+        <p>There is nothing magic about it. It is just a structure that makes sense, that we follow together, and that works when you are serious about it.</p>
+        <a class="upsell-cta" href="https://eloaprivateclub.framer.website/home-3" target="_blank">See the structure I use →</a>
       </div>
       <button class="logout-btn" id="logout-btn" style="margin-top:16px;">Use a different account</button>
     </div>
@@ -1043,9 +1062,9 @@ async function handleSubmit() {
 function renderUpsell() {
   return `
     <div class="upsell-block" style="margin-top: 32px;">
-      <h4>That was your last free analysis.</h4>
-      <p>You've now seen how I work. If you want this kind of feedback on your trades every week — not a one-off, but a real structured process to fix your reasoning and build consistency — send me a message on Discord. I'll take a look at where you're at and tell you if the audit makes sense for you.</p>
-      <a class="upsell-cta" href="https://discord.com" target="_blank">Message me on Discord →</a>
+      <h4>Want to go further?</h4>
+      <p>Here is the exact structure I use when I work with a trader. This is what has allowed traders in your exact situation to build confidence, take better trades and scale with investor capital. There is nothing magic about it.</p>
+      <a class="upsell-cta" href="https://eloaprivateclub.framer.website/home-3" target="_blank">See the structure I use →</a>
     </div>
   `;
 }
