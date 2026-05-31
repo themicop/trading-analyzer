@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Proper Trader Clone</title>
+<title>Your Trading Roadmap — By Alex</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
@@ -613,10 +613,10 @@
   <header>
     <div class="header-inner">
       <div class="logo-area">
-        <h1>Alex —</h1>
-        <h2>The Proper<br>Trader Clone</h2>
+        <h1>By Alex —</h1>
+        <h2>Your Trading<br>Roadmap.</h2>
       </div>
-      <div class="header-badge">GET MY EXACT VIEW<br>ON YOUR CHART</div>
+      <div class="header-badge">POWERED BY<br>ALEX'S DATA</div>
     </div>
   </header>
 
@@ -761,14 +761,14 @@ function renderGate() {
   return `
     <div class="gate fade-in">
       <div class="gate-eyebrow">Access Required</div>
-      <h3>Get Your Chart<br>Analysed.</h3>
-      <p>This tool is exclusively available to traders who have completed the full training program. Enter the email you used to purchase access.</p>
+      <h3>Get Your Personal<br>Roadmap.</h3>
+      <p>I can't reply to everyone personally. So I've fed everything into this — my way of thinking, my market approach, years of experience. Describe where you're at, what you're struggling with, and this AI will give you an honest roadmap of exactly what to focus on in the coming months to get results.<br><br><em>This is not a generic chatbot. This is how I think.</em><br><br>Enter the email you used to purchase access.</p>
       <div class="input-row">
         <input type="email" id="gate-email" placeholder="your@email.com" />
         <button class="btn-primary" id="gate-btn">Access →</button>
       </div>
       <div class="error-msg" id="gate-error"></div>
-      <p class="gate-note">// Limited to ${MAX_ANALYSES} free analyses per account</p>
+      <p class="gate-note">// Limited to 3 personalized responses maximum</p>
     </div>
   `;
 }
@@ -783,21 +783,12 @@ function renderAnalyzer() {
         <button class="logout-btn" id="logout-btn">Log out</button>
       </div>
 
-      <div class="section-label">01 — Upload your chart</div>
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" id="file-input" accept="image/*" />
-        <div class="upload-icon">📊</div>
-        <p class="upload-text">Drop your chart screenshot here</p>
-        <p class="upload-hint">PNG, JPG, WEBP — TradingView screenshots work best</p>
-      </div>
-      <div id="preview-container"></div>
-
-      <div class="section-label">02 — Describe your reasoning</div>
-      <textarea id="reasoning" placeholder="Tell me: What pair/timeframe? What did you see before entering? Why did you take this trade (or why are you considering it)? What is your stop loss and target? Be specific — generic descriptions get generic feedback."></textarea>
+      <div class="section-label">Tell me where you're at</div>
+      <textarea id="reasoning" placeholder="How long have you been trading? What's your main struggle right now? What have you already tried? Be honest — the more specific you are, the more precise your roadmap will be."></textarea>
 
       <div class="submit-row">
-        <span class="submit-note">// Analysis uses AI — be specific for best results</span>
-        <button class="btn-submit" id="submit-btn">Get Analysis →</button>
+        <span class="submit-note">// Powered by Alex's data — be specific for best results</span>
+        <button class="btn-submit" id="submit-btn">Get My Roadmap →</button>
       </div>
 
       <div id="loading-container"></div>
@@ -826,8 +817,8 @@ function renderHistory() {
 function renderLimitReached() {
   return `
     <div class="limit-block fade-in">
-      <h3>You've used your<br>3 free analyses.</h3>
-      <p>You've seen what I do. I've looked at your charts, I've pointed out what's working and what needs fixing.<br><br>If you want to continue working on your analysis and get personalized feedback every week, here's how we can work together properly.</p>
+      <h3>You've got your<br>3 free roadmaps.</h3>
+      <p>You've seen how I think. Now if you want to work on this properly — with real personalized feedback on your specific situation every week — here's how we can do it.</p>
       <div class="upsell-block" style="text-align:left; margin-bottom: 24px;">
         <h4>Audit — Personalized coaching</h4>
         <p>You send me your trades. I come back with a detailed video review of your reasoning, your entries, your risk management. Every week. This is what moves the needle.</p>
@@ -945,11 +936,6 @@ async function handleSubmit() {
   const responseContainer = document.getElementById('response-container');
   const submitBtn = document.getElementById('submit-btn');
 
-  if (!currentImage) {
-    alert('Please upload a chart screenshot first.');
-    return;
-  }
-
   if (!reasoning || reasoning.length < 20) {
     alert('Please describe your reasoning in at least a few sentences. Generic descriptions get generic feedback.');
     return;
@@ -966,7 +952,7 @@ async function handleSubmit() {
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div><div class="bar"></div>
       </div>
-      <p class="loading-text">// Reading your chart structure...</p>
+      <p class="loading-text">// Building your roadmap...</p>
     </div>
   `;
   responseContainer.innerHTML = '';
@@ -1056,7 +1042,7 @@ async function handleSubmit() {
   isLoading = false;
   if (submitBtn) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Get Analysis →';
+    submitBtn.textContent = 'Get My Roadmap →';
   }
 }
 
